@@ -272,7 +272,7 @@
             <Property name="text" type="java.lang.String" value="Cu&#x1ed1;i c&#xf9;ng"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lastProductActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="chooseImageButton">
@@ -336,7 +336,7 @@
             <Property name="text" type="java.lang.String" value="&#x110;&#x1ea7;u ti&#xea;n"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton7ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="firstProductActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="jButton8">
@@ -347,7 +347,7 @@
             <Property name="text" type="java.lang.String" value="Ti&#x1ebf;p theo"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton8ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nextProductActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="jButton9">
@@ -358,7 +358,7 @@
             <Property name="text" type="java.lang.String" value="Ph&#xec;a tr&#x1b0;&#x1edb;c"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton9ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="previousProductActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

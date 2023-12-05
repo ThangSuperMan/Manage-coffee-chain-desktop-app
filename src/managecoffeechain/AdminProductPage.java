@@ -1,5 +1,6 @@
 package managecoffeechain;
 
+import java.awt.Color;
 import models.Product;
 import java.awt.Image;
 import java.io.File;
@@ -12,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -33,6 +34,9 @@ import javax.swing.table.DefaultTableModel;
  * @author thangphan
  */
 public class AdminProductPage extends javax.swing.JFrame {
+	
+	String imagePath = null;
+	int currentActiveProductPosition = 0;
 
 	/**
 	 * Creates new form AdminProductPage
@@ -41,8 +45,6 @@ public class AdminProductPage extends javax.swing.JFrame {
 		initComponents();
 		displayProductsInProductsTable();
 	}
-
-	String imagePath = null;
 
 	public Connection getConnection() {
 		Connection conn = null;
@@ -74,7 +76,12 @@ public class AdminProductPage extends javax.swing.JFrame {
 			statement = conn.createStatement();
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
-				Product product = new Product(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getFloat("price"), resultSet.getString("add_date"), resultSet.getBytes("image"));
+				Product product = new Product(
+					resultSet.getInt("id"),
+					resultSet.getString("name"),
+					resultSet.getFloat("price"),
+					resultSet.getString("add_date"),
+					resultSet.getBytes("image"));
 				
 				products.add(product);
 			}
@@ -88,6 +95,14 @@ public class AdminProductPage extends javax.swing.JFrame {
 	public void clearTableData(DefaultTableModel model) {
 		model.setRowCount(0);
 	}
+	
+	public void clearCurrentProductDisplay() {
+		productIdTextField.setText("");
+		productNameTextField.setText("");
+		productPriceTextField.setText("");
+		productAddDateTextField.setDate(null);
+		imageLabel.setIcon(null);
+	}
 
 	public void displayProductsInProductsTable() {
 		ArrayList<Product> products = getProducts();
@@ -97,14 +112,9 @@ public class AdminProductPage extends javax.swing.JFrame {
 			clearTableData(model);
 		}
 
-		Object[] row = new Object[4];
-		for (int i = 0; i < products.size(); i++) {
-			row[0] = products.get(i).getId();
-			row[1] = products.get(i).getName();
-			row[2] = products.get(i).getPrice();
-			row[3] = products.get(i).getAddDate();
-			
-			model.addRow(row);
+		for (Product product: products) {
+			Object[] rowData = { product.getId(), product.getName(), product.getPrice(), product.getAddDate() };
+			model.addRow(rowData);
 		}
 	}
 	
@@ -128,13 +138,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 
 	public ImageIcon resizeImage(String imagePath, byte[] picture) {
 		ImageIcon imageIcon = null;
-
-		if (imagePath != null) {
-			imageIcon = new ImageIcon(imagePath);
-		} else {
-			imageIcon = new ImageIcon(picture);
-		}
-
+		imageIcon = imagePath != null ? new ImageIcon(imagePath) : new ImageIcon(picture);
 		Image image = imageIcon.getImage();
 		Image image2 = image.getScaledInstance(imageLabel.getWidth(), imageLabel.getHeight(), Image.SCALE_SMOOTH);
 
@@ -232,7 +236,7 @@ public class AdminProductPage extends javax.swing.JFrame {
                 jButton1.setText("Cuối cùng");
                 jButton1.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton1ActionPerformed(evt);
+                                lastProductActionPerformed(evt);
                         }
                 });
 
@@ -275,7 +279,7 @@ public class AdminProductPage extends javax.swing.JFrame {
                 jButton7.setText("Đầu tiên");
                 jButton7.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton7ActionPerformed(evt);
+                                firstProductActionPerformed(evt);
                         }
                 });
 
@@ -283,7 +287,7 @@ public class AdminProductPage extends javax.swing.JFrame {
                 jButton8.setText("Tiếp theo");
                 jButton8.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton8ActionPerformed(evt);
+                                nextProductActionPerformed(evt);
                         }
                 });
 
@@ -291,7 +295,7 @@ public class AdminProductPage extends javax.swing.JFrame {
                 jButton9.setText("Phìa trước");
                 jButton9.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton9ActionPerformed(evt);
+                                previousProductActionPerformed(evt);
                         }
                 });
 
@@ -399,9 +403,10 @@ public class AdminProductPage extends javax.swing.JFrame {
                 pack();
         }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-	    // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void lastProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastProductActionPerformed
+	    currentActiveProductPosition = getProducts().size() - 1;
+	    displayASpecificProduct(currentActiveProductPosition);
+    }//GEN-LAST:event_lastProductActionPerformed
 
     private void addProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addProductActionPerformed
 	    if (checkInputs() && imagePath != null) {
@@ -454,6 +459,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 				    ps.setString(3, addDate);
 				    ps.setInt(4, Integer.parseInt(productIdTextField.getText()));
 				    ps.executeUpdate();
+				    
 				    displayProductsInProductsTable();
 				    JOptionPane.showMessageDialog(null, "Cập nhật sản phẩm thành công");
 			    } catch (SQLException ex) {
@@ -481,6 +487,8 @@ public class AdminProductPage extends javax.swing.JFrame {
 				    ps.setBlob(4, image);
 				    ps.setInt(5, Integer.parseInt(productIdTextField.getText()));
 				    ps.executeUpdate();
+				    
+				    displayProductsInProductsTable();
 				    JOptionPane.showMessageDialog(null, "Cập nhật sản phẩm thành công");
 			    } catch (SQLException ex) {
 				    JOptionPane.showMessageDialog(null, ex.getMessage());
@@ -503,10 +511,13 @@ public class AdminProductPage extends javax.swing.JFrame {
 		    try {
 			    updateQuery = "DELETE FROM products WHERE id = ?";
 			    ps = conn.prepareStatement(updateQuery);
-
 			    ps.setInt(1, Integer.parseInt(productIdTextField.getText()));
 			    ps.executeUpdate();
+			    
 			    JOptionPane.showMessageDialog(null, "Xoá sản phẩm thành công");
+			    
+			    displayProductsInProductsTable();
+			    clearCurrentProductDisplay();
 		    } catch (SQLException ex) {
 			    JOptionPane.showMessageDialog(null, ex.getMessage());
 			    JOptionPane.showMessageDialog(null, "Xoá sản phẩm không thành công");
@@ -516,17 +527,28 @@ public class AdminProductPage extends javax.swing.JFrame {
 	    }
     }//GEN-LAST:event_deleteProductActionPerformed
 
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-	    // TODO add your handling code here:
-    }//GEN-LAST:event_jButton7ActionPerformed
+    private void firstProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstProductActionPerformed
+	    currentActiveProductPosition = 0;
+	    displayASpecificProduct(currentActiveProductPosition);
+    }//GEN-LAST:event_firstProductActionPerformed
 
-    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-	    // TODO add your handling code here:
-    }//GEN-LAST:event_jButton8ActionPerformed
+    private void nextProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextProductActionPerformed
+	    currentActiveProductPosition++;
+	    if (currentActiveProductPosition >= getProducts().size()) {
+		    currentActiveProductPosition = getProducts().size() - 1;
+	    }
+	    
+	    displayASpecificProduct(currentActiveProductPosition);
+    }//GEN-LAST:event_nextProductActionPerformed
 
-    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-	    // TODO add your handling code here:
-    }//GEN-LAST:event_jButton9ActionPerformed
+    private void previousProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousProductActionPerformed
+	    currentActiveProductPosition--;
+	    if (currentActiveProductPosition < 0) {
+		    currentActiveProductPosition = 0;
+	    }
+	    
+	    displayASpecificProduct(currentActiveProductPosition);
+    }//GEN-LAST:event_previousProductActionPerformed
 
     private void chooseImageButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseImageButtonActionPerformed
 	    JFileChooser file = new JFileChooser();
