@@ -84,10 +84,18 @@ public class AdminProductPage extends javax.swing.JFrame {
 
 		return products;
 	}
+	
+	public void clearTableData(DefaultTableModel model) {
+		model.setRowCount(0);
+	}
 
 	public void displayProductsInProductsTable() {
 		ArrayList<Product> products = getProducts();
 		DefaultTableModel model = (DefaultTableModel) productsTable.getModel();
+		
+		if (model.getRowCount() != 0) {
+			clearTableData(model);
+		}
 
 		Object[] row = new Object[4];
 		for (int i = 0; i < products.size(); i++) {
@@ -104,13 +112,13 @@ public class AdminProductPage extends javax.swing.JFrame {
 		ArrayList<Product> products = getProducts();
 		
 		productIdTextField.setText(String.valueOf(products.get(index).getId()));
-		productIdTextField.setText(String.valueOf(products.get(index).getName()));
-		productIdTextField.setText(String.valueOf(products.get(index).getPrice()));
-		productIdTextField.setText(String.valueOf(products.get(index).getAddDate()));
+		productNameTextField.setText(String.valueOf(products.get(index).getName()));
+		productPriceTextField.setText(String.valueOf(products.get(index).getPrice()));
 		
 		try {
 			Date addDate = null;
 			addDate = new SimpleDateFormat("dd-MM-yyyy").parse(String.valueOf(products.get(index).getAddDate()));
+			productAddDateTextField.setDate(addDate);
 		} catch (ParseException ex) {
 			System.out.println("Exception here: " + ex);
 		}
@@ -213,6 +221,11 @@ public class AdminProductPage extends javax.swing.JFrame {
                                 "ID", "Tên sản phẩm", "Giá", "Ngày tạo"
                         }
                 ));
+                productsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+                        public void mouseClicked(java.awt.event.MouseEvent evt) {
+                                productsTableMouseClicked(evt);
+                        }
+                });
                 jScrollPane1.setViewportView(productsTable);
 
                 jButton1.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
@@ -441,6 +454,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 				    ps.setString(3, addDate);
 				    ps.setInt(4, Integer.parseInt(productIdTextField.getText()));
 				    ps.executeUpdate();
+				    displayProductsInProductsTable();
 				    JOptionPane.showMessageDialog(null, "Cập nhật sản phẩm thành công");
 			    } catch (SQLException ex) {
 				    System.out.println("Exception here: " + ex);
@@ -530,6 +544,11 @@ public class AdminProductPage extends javax.swing.JFrame {
 		    System.out.println("Chưa có file nào được chọn");
 	    }
     }//GEN-LAST:event_chooseImageButtonActionPerformed
+
+        private void productsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productsTableMouseClicked
+		int index = productsTable.getSelectedRow();
+		displayASpecificProduct(index);
+        }//GEN-LAST:event_productsTableMouseClicked
 
 	/**
 	 * @param args the command line arguments
