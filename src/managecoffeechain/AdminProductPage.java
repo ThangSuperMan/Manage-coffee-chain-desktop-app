@@ -1,6 +1,6 @@
 package managecoffeechain;
 
-import java.awt.Color;
+import utils.Utils;
 import models.Product;
 import java.awt.Image;
 import java.io.File;
@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,9 +18,9 @@ import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import services.ProductService;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,6 +33,8 @@ import javax.swing.table.DefaultTableModel;
  */
 public class AdminProductPage extends javax.swing.JFrame {
 	
+	ProductService productService = new ProductService();
+	Utils utils = new Utils();
 	String imagePath = null;
 	int currentActiveProductPosition = 0;
 
@@ -65,33 +65,6 @@ public class AdminProductPage extends javax.swing.JFrame {
 		return conn;
 	}
 
-	public ArrayList<Product> getProducts() {
-		ArrayList<Product> products = new ArrayList<Product>();
-		Connection conn = getConnection();
-		String query = "SELECT * FROM products";
-		Statement statement;
-		ResultSet resultSet;
-
-		try {
-			statement = conn.createStatement();
-			resultSet = statement.executeQuery(query);
-			while (resultSet.next()) {
-				Product product = new Product(
-					resultSet.getInt("id"),
-					resultSet.getString("name"),
-					resultSet.getFloat("price"),
-					resultSet.getString("add_date"),
-					resultSet.getBytes("image"));
-				
-				products.add(product);
-			}
-		} catch (SQLException ex) {
-			System.out.println("Exception here: " + ex);
-		}
-
-		return products;
-	}
-	
 	public void clearTableData(DefaultTableModel model) {
 		model.setRowCount(0);
 	}
@@ -105,7 +78,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 	}
 
 	public void displayProductsInProductsTable() {
-		ArrayList<Product> products = getProducts();
+		ArrayList<Product> products = productService.getProducts();
 		DefaultTableModel model = (DefaultTableModel) productsTable.getModel();
 		
 		if (model.getRowCount() != 0) {
@@ -119,7 +92,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 	}
 	
 	public void displayASpecificProduct(int index) {
-		ArrayList<Product> products = getProducts();
+		ArrayList<Product> products = productService.getProducts();
 		
 		productIdTextField.setText(String.valueOf(products.get(index).getId()));
 		productNameTextField.setText(String.valueOf(products.get(index).getName()));
@@ -133,16 +106,7 @@ public class AdminProductPage extends javax.swing.JFrame {
 			System.out.println("Exception here: " + ex);
 		}
 		
-		imageLabel.setIcon(resizeImage(null, products.get(index).getImage()));
-	}
-
-	public ImageIcon resizeImage(String imagePath, byte[] picture) {
-		ImageIcon imageIcon = null;
-		imageIcon = imagePath != null ? new ImageIcon(imagePath) : new ImageIcon(picture);
-		Image image = imageIcon.getImage();
-		Image image2 = image.getScaledInstance(imageLabel.getWidth(), imageLabel.getHeight(), Image.SCALE_SMOOTH);
-
-		return new ImageIcon(image2);
+		imageLabel.setIcon(utils.resizeImage(null, products.get(index).getImage(), imageLabel));
 	}
 
 	public boolean checkInputs() {
@@ -404,7 +368,7 @@ public class AdminProductPage extends javax.swing.JFrame {
         }// </editor-fold>//GEN-END:initComponents
 
     private void lastProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastProductActionPerformed
-	    currentActiveProductPosition = getProducts().size() - 1;
+	    currentActiveProductPosition = productService.getProducts().size() - 1;
 	    displayASpecificProduct(currentActiveProductPosition);
     }//GEN-LAST:event_lastProductActionPerformed
 
@@ -534,8 +498,9 @@ public class AdminProductPage extends javax.swing.JFrame {
 
     private void nextProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextProductActionPerformed
 	    currentActiveProductPosition++;
-	    if (currentActiveProductPosition >= getProducts().size()) {
-		    currentActiveProductPosition = getProducts().size() - 1;
+	    int totalProducts = productService.getProducts().size();
+	    if (currentActiveProductPosition >= totalProducts) {
+		    currentActiveProductPosition = totalProducts - 1;
 	    }
 	    
 	    displayASpecificProduct(currentActiveProductPosition);
@@ -560,7 +525,8 @@ public class AdminProductPage extends javax.swing.JFrame {
 	    if (isApproveChooseImage) {
 		    File selectedFile = file.getSelectedFile();
 		    String path = selectedFile.getAbsolutePath();
-		    imageLabel.setIcon(resizeImage(path, null));
+		    Utils utils = new Utils();
+		    imageLabel.setIcon(utils.resizeImage(path, null, imageLabel));
 		    imagePath = path;
 	    } else {
 		    System.out.println("Chưa có file nào được chọn");

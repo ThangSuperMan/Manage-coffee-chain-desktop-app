@@ -3,8 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/AdminProductPage.java</file>
-            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/ManageCoffeeChain.java</file>
+            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/AdminProductPage.java</file>
+            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/AdminDashboardPage.java</file>
+            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/database/DBConnection.java</file>
+            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/ManageOrderPage.java</file>
         </group>
     </open-files>
 </project-private>
