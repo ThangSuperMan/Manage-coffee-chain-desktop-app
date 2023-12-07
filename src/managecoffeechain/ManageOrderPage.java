@@ -6,24 +6,12 @@
 
 package managecoffeechain;
 
-import com.sun.corba.se.impl.orbutil.closure.Constant;
-import com.sun.xml.internal.fastinfoset.tools.StAX2SAXReader;
-import services.ProductService;
+import services.*;
+import models.*;
 import utils.Utils;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.print.PrinterException;
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -32,10 +20,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-import models.Product;
 
 /**
  *
@@ -66,17 +52,17 @@ public class ManageOrderPage extends javax.swing.JFrame {
     }
     
     public void supportRenderImageInTheOrderProductsTable() {
-	    	productsOrderTable.getColumnModel().getColumn(4).setCellRenderer(new ImageRenderer());
+	    	productsOrderMenuTable.getColumnModel().getColumn(4).setCellRenderer(new ImageRenderer());
     }
     
     public void displayProductsInProductsTable() {
 		ProductService productService = new ProductService();
 		ArrayList<Product> products = productService.getProducts();
-		DefaultTableModel model = (DefaultTableModel) productsOrderTable.getModel();
+		DefaultTableModel model = (DefaultTableModel) productsOrderMenuTable.getModel();
 		
 		supportRenderImageInTheOrderProductsTable();
 		int rowHeight = 150;
-		productsOrderTable.setRowHeight(rowHeight);
+		productsOrderMenuTable.setRowHeight(rowHeight);
 		
 		for (Product product: products) {
 			ImageIcon scaledImageIcon = createScaledImageIcon(product.getImage(), 120, 120);
@@ -189,12 +175,8 @@ public class ManageOrderPage extends javax.swing.JFrame {
 
                 jPanel1 = new javax.swing.JPanel();
                 jPanel2 = new javax.swing.JPanel();
-                jButton4 = new javax.swing.JButton();
-                jButton3 = new javax.swing.JButton();
-                jButton5 = new javax.swing.JButton();
-                newOrderButton = new javax.swing.JButton();
                 jScrollPane3 = new javax.swing.JScrollPane();
-                productsOrderTable = new javax.swing.JTable();
+                productsOrderMenuTable = new javax.swing.JTable();
                 bannerImageLabel = new javax.swing.JLabel();
                 jPanel3 = new javax.swing.JPanel();
                 jScrollPane1 = new javax.swing.JScrollPane();
@@ -214,6 +196,9 @@ public class ManageOrderPage extends javax.swing.JFrame {
                 payButton = new javax.swing.JButton();
                 jLabel5 = new javax.swing.JLabel();
                 balanceTextField = new javax.swing.JTextField();
+                newOrderButton = new javax.swing.JButton();
+                payByCashCheckBox = new javax.swing.JCheckBox();
+                payByMomoCheckBox = new javax.swing.JCheckBox();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -228,36 +213,7 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)
                 );
 
-                jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/managecoffeechain/images/banh_mousse_dao.png"))); // NOI18N
-                jButton4.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton4ActionPerformed(evt);
-                        }
-                });
-
-                jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/managecoffeechain/images/banh_mousse_cacao.png"))); // NOI18N
-                jButton3.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                jButton3ActionPerformed(evt);
-                        }
-                });
-
-                jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/managecoffeechain/images/banh_mousse_dao.png"))); // NOI18N
-                jButton5.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                productActionPerformed(evt);
-                        }
-                });
-
-                newOrderButton.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                newOrderButton.setText("Tạo đơn mới");
-                newOrderButton.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                createNewOrderActionPerformed(evt);
-                        }
-                });
-
-                productsOrderTable.setModel(new javax.swing.table.DefaultTableModel(
+                productsOrderMenuTable.setModel(new javax.swing.table.DefaultTableModel(
                         new Object [][] {
 
                         },
@@ -265,13 +221,13 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                 "Id", "Tên", "Giá", "Ngày", "Hình"
                         }
                 ));
-                productsOrderTable.setSize(new java.awt.Dimension(450, 164));
-                productsOrderTable.addMouseListener(new java.awt.event.MouseAdapter() {
+                productsOrderMenuTable.setSize(new java.awt.Dimension(450, 164));
+                productsOrderMenuTable.addMouseListener(new java.awt.event.MouseAdapter() {
                         public void mouseClicked(java.awt.event.MouseEvent evt) {
-                                productsOrderTableMouseClicked(evt);
+                                productsOrderMenuTableMouseClicked(evt);
                         }
                 });
-                jScrollPane3.setViewportView(productsOrderTable);
+                jScrollPane3.setViewportView(productsOrderMenuTable);
 
                 bannerImageLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/managecoffeechain/images/coffee-shop-banner-chrismas.jpeg"))); // NOI18N
 
@@ -287,20 +243,10 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                 .addContainerGap()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGap(0, 0, Short.MAX_VALUE))
                                         .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(newOrderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(bannerImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(bannerImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 );
                 jPanel1Layout.setVerticalGroup(
@@ -312,15 +258,7 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(bannerImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(388, 388, 388)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(newOrderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(376, 376, 376))
+                                .addContainerGap())
                 );
 
                 productsTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -438,13 +376,25 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         }
                 });
 
+                newOrderButton.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
+                newOrderButton.setText("Tạo đơn mới");
+                newOrderButton.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                createNewOrderActionPerformed(evt);
+                        }
+                });
+
+                payByCashCheckBox.setText("Thanh toán bằng tiền mặt");
+
+                payByMomoCheckBox.setText("Thanh toán băng momo");
+
                 javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
                 jPanel4.setLayout(jPanel4Layout);
                 jPanel4Layout.setHorizontalGroup(
                         jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addGap(16, 16, 16)
-                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -453,8 +403,9 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                                 .addComponent(cashReceiveTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
                                                 .addComponent(totalTextField, javax.swing.GroupLayout.Alignment.TRAILING)
-                                                .addComponent(subTotalTextField, javax.swing.GroupLayout.Alignment.TRAILING)))
-                                .addGap(31, 31, 31)
+                                                .addComponent(subTotalTextField, javax.swing.GroupLayout.Alignment.TRAILING))
+                                        .addComponent(newOrderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(26, 26, 26)
                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(jPanel4Layout.createSequentialGroup()
                                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -462,17 +413,22 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                                         .addComponent(jLabel5))
                                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addGroup(jPanel4Layout.createSequentialGroup()
-                                                                .addGap(7, 7, 7)
-                                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addGroup(jPanel4Layout.createSequentialGroup()
                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(taxTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                                .addComponent(taxTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(jPanel4Layout.createSequentialGroup()
+                                                                .addGap(7, 7, 7)
+                                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
-                                                .addComponent(jButton1)
-                                                .addGap(23, 23, 23))))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                        .addComponent(payButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(payByCashCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(payByMomoCheckBox)
+                                                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 194, Short.MAX_VALUE))
+                                                .addGap(84, 84, 84))))
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(jPanel4Layout.createSequentialGroup()
                                         .addGap(16, 16, 16)
@@ -497,19 +453,22 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                                                 .addComponent(jLabel3)
                                                                 .addComponent(totalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(jLabel5))
-                                                .addGap(18, 18, 18)
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jLabel1)
-                                                        .addComponent(cashReceiveTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                        .addComponent(jLabel5)))
                                         .addGroup(jPanel4Layout.createSequentialGroup()
                                                 .addGap(12, 12, 12)
-                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(30, 30, 30)
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addContainerGap(70, Short.MAX_VALUE))
+                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1)
+                                        .addComponent(cashReceiveTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(payByCashCheckBox)
+                                        .addComponent(payByMomoCheckBox))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(newOrderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(76, Short.MAX_VALUE))
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(jPanel4Layout.createSequentialGroup()
                                         .addGap(16, 16, 16)
@@ -533,29 +492,20 @@ public class ManageOrderPage extends javax.swing.JFrame {
                 layout.setVerticalGroup(
                         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(14, 14, 14))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(18, 18, 18)
+                                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 );
 
                 pack();
         }// </editor-fold>//GEN-END:initComponents
-
-    private void productActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productActionPerformed
-	System.out.println("clicked a row");
-//        addToTable(name, price);
-	
-    }//GEN-LAST:event_productActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
 
     private void createNewOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createNewOrderActionPerformed
         DefaultTableModel tb = (DefaultTableModel) productsTable.getModel();
@@ -568,12 +518,6 @@ public class ManageOrderPage extends javax.swing.JFrame {
         balanceTextField.setText("");
         cashReceiveTextField.setText("");
     }//GEN-LAST:event_createNewOrderActionPerformed
-
-        private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-                String name = "Bánh dẻo";
-                Double price = 50.000;
-//                addToTable(name, price);
-        }//GEN-LAST:event_jButton3ActionPerformed
 
         private void balanceTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_balanceTextField1ActionPerformed
                 // TODO add your handling code here:
@@ -595,11 +539,28 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         return;
                 }
 
-                Double total = Double.valueOf(getTotal());
-                Double cashRequired = Double.valueOf(cashReceiveTextField.getText());
-                Double balance = cashRequired - total;
+                Float total = Float.valueOf(getTotal());
+                Float cashRequired = Float.valueOf(cashReceiveTextField.getText());
+                Float balance = cashRequired - total;
                 balanceTextField.setText(String.valueOf(balance));
                 printBill();
+		
+		// Save the order to the database
+		
+		// get payment method
+		
+		String paymentMethod = "cash";
+		if (payByMomoCheckBox.isSelected()) {
+			paymentMethod = "momo";
+		}
+		OrderService orderService = new OrderService();
+		int selectedRowIndex = productsOrderMenuTable.getSelectedRow();
+		int productId = (int) productsOrderMenuTable.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
+//		Product product = productService.getProductById(productId);
+//		addToTable(product);
+		Order order = new Order(total, paymentMethod, productId);
+		orderService.insertOrder(order);
+		JOptionPane.showMessageDialog(null, "Đơn hàng đã thanh toán thành công");
         }//GEN-LAST:event_payButtonActionPerformed
 
         private void taxTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_taxTextFieldKeyReleased
@@ -631,12 +592,12 @@ public class ManageOrderPage extends javax.swing.JFrame {
 
         }//GEN-LAST:event_cashReceiveTextFieldActionPerformed
 
-        private void productsOrderTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productsOrderTableMouseClicked
-		int selectedRowIndex = productsOrderTable.getSelectedRow();
-		int productId = (int) productsOrderTable.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
+        private void productsOrderMenuTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productsOrderMenuTableMouseClicked
+		int selectedRowIndex = productsOrderMenuTable.getSelectedRow();
+		int productId = (int) productsOrderMenuTable.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
 		Product product = productService.getProductById(productId);
 		addToTable(product);
-        }//GEN-LAST:event_productsOrderTableMouseClicked
+        }//GEN-LAST:event_productsOrderMenuTableMouseClicked
 
     /**
      * @param args the command line arguments
@@ -680,9 +641,6 @@ public class ManageOrderPage extends javax.swing.JFrame {
         private javax.swing.JTextPane billTextPanel;
         private javax.swing.JTextField cashReceiveTextField;
         private javax.swing.JButton jButton1;
-        private javax.swing.JButton jButton3;
-        private javax.swing.JButton jButton4;
-        private javax.swing.JButton jButton5;
         private javax.swing.JLabel jLabel1;
         private javax.swing.JLabel jLabel2;
         private javax.swing.JLabel jLabel3;
@@ -697,7 +655,9 @@ public class ManageOrderPage extends javax.swing.JFrame {
         private javax.swing.JScrollPane jScrollPane3;
         private javax.swing.JButton newOrderButton;
         private javax.swing.JButton payButton;
-        private javax.swing.JTable productsOrderTable;
+        private javax.swing.JCheckBox payByCashCheckBox;
+        private javax.swing.JCheckBox payByMomoCheckBox;
+        private javax.swing.JTable productsOrderMenuTable;
         private javax.swing.JTable productsTable;
         private javax.swing.JTextField subTotalTextField;
         private javax.swing.JTextField taxTextField;

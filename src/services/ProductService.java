@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class ProductService {
 	public ArrayList<Product> getProducts() {
-		ArrayList<models.Product> products = new ArrayList<models.Product>();
+		ArrayList<Product> products = new ArrayList<Product>();
 		DBConnection dbConnection = new DBConnection();
 		Connection conn = dbConnection.getConnection();
 		String query = "SELECT * FROM products";
@@ -31,7 +31,7 @@ public class ProductService {
 			statement = conn.createStatement();
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
-				models.Product product = new models.Product(
+				Product product = new Product(
 					resultSet.getInt("id"),
 					resultSet.getString("name"),
 					resultSet.getFloat("price"),
@@ -48,7 +48,7 @@ public class ProductService {
 	}
 	
 	public Product getProductById(int productId) {
-		models.Product product = null;
+		Product product = null;
 		DBConnection dbConnection = new DBConnection();
 		Connection conn = dbConnection.getConnection();
 		String query = "SELECT * FROM products WHERE id = ?";
@@ -61,7 +61,7 @@ public class ProductService {
 
 		    resultSet = preparedStatement.executeQuery();
 		    if (resultSet.next()) {
-			product = new models.Product(
+			product = new Product(
 			    resultSet.getInt("id"),
 			    resultSet.getString("name"),
 			    resultSet.getFloat("price"),

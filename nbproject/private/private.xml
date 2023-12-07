@@ -5,8 +5,8 @@
         <group>
             <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/AdminProductPage.java</file>
             <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/AdminDashboardPage.java</file>
-            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/database/DBConnection.java</file>
             <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/ManageOrderPage.java</file>
+            <file>file:/Users/thangphan/NetBeansProjects/ManageCoffeeChain/src/managecoffeechain/ManageCoffeeChain.java</file>
         </group>
     </open-files>
 </project-private>
