@@ -7,12 +7,25 @@ package managecoffeechain;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Image;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import models.OrderProductResult;
+import models.Product;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
+import services.OrderProductService;
 import services.OrderService;
+import services.ProductService;
 
 /**
  *
@@ -25,41 +38,54 @@ public class AdminDashboardPage2 extends javax.swing.JFrame {
 	 */
 	public AdminDashboardPage2() {
 		initComponents();
-		showPieChart();
+		
+		displayProductsInProductsTable();
 	}
 	
-	public void showPieChart(){
-	      OrderService orderService = new OrderService();
-	      
-	      //create dataset
-	      DefaultPieDataset barDataset = new DefaultPieDataset( );
-	      barDataset.setValue( "Thanh toán bằng tiền mặt" , new Double( orderService.getTotalAmountByPaymentMethod("cash") ));  
-	      barDataset.setValue( "Thanh toán bằng momo" , new Double( orderService.getTotalAmountByPaymentMethod("momo") ) );   
-
-	      //create chart
-	       JFreeChart piechart = ChartFactory.createPieChart("mobile sales",barDataset, false,true,false);//explain
-
-		PiePlot piePlot =(PiePlot) piechart.getPlot();
-
-	       //changing pie chart blocks colors
-	       piePlot.setSectionPaint("Thanh toán bằng tiền mặt", new Color(255,255,102));
-		piePlot.setSectionPaint("Thanh toán bằng momo", new Color(102,255,102));
-//		piePlot.setSectionPaint("MotoG", new Color(255,102,153));
-//		piePlot.setSectionPaint("Nokia Lumia", new Color(0,204,204));
-
-
-		piePlot.setBackgroundPaint(Color.white);
-
-		panelBarChart.setLayout(new BorderLayout());
-		//create chartPanel to display chart(graph)
-		ChartPanel barChartPanel = new ChartPanel(piechart);
-		panelBarChart.removeAll();
-		panelBarChart.add(barChartPanel, BorderLayout.CENTER);
-		panelBarChart.validate();
-		
-		panelBarChart.repaint();
-	    }
+	public void clearTableData() {
+		DefaultTableModel model = (DefaultTableModel) productsTable.getModel();
+		model.setRowCount(0);
+	}
 	
+	static class ImageRenderer extends JLabel implements TableCellRenderer {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value instanceof ImageIcon) {
+                setIcon((ImageIcon) value);
+            } else {
+                setIcon(null);
+            }
+            return this;
+        }
+    }
+    
+	public void supportRenderImageInTheOrderProductsTable() {
+		productsTable.getColumnModel().getColumn(3).setCellRenderer(new ImageRenderer());
+	}
+    
+	public void displayProductsInProductsTable() {
+		ProductService productService = new ProductService();
+		OrderProductService orderProductService = new OrderProductService();
+		ArrayList<Product> products = productService.getProducts();
+		List<OrderProductResult> orderProductResults = orderProductService.getTotalMoneyPerDayPerProduct();
+		DefaultTableModel model = (DefaultTableModel) productsTable.getModel();
+		
+		supportRenderImageInTheOrderProductsTable();
+		int rowHeight = 150;
+		productsTable.setRowHeight(rowHeight);
+		
+		for (OrderProductResult orderProductResult: orderProductResults) {
+			ImageIcon scaledImageIcon = createScaledImageIcon(orderProductResult.getProductImage(), 120, 120);
+			
+			Object[] rowData = { orderProductResult.getOrderDay(), orderProductResult.getProductName(), orderProductResult.getTotalMoneyPerDayPerProduct(), scaledImageIcon };
+			model.addRow(rowData);
+		}
+	}
+    
+	private ImageIcon createScaledImageIcon(byte[] imageData, int width, int height) {
+	    ImageIcon imageIcon = new ImageIcon(imageData);
+	    Image scaledImage = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+	    return new ImageIcon(scaledImage);
+	}
 
 	/**
 	 * This method is called from within the constructor to initialize the
@@ -70,40 +96,72 @@ public class AdminDashboardPage2 extends javax.swing.JFrame {
         // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
         private void initComponents() {
 
-                panelBarChart = new java.awt.Panel();
+                jScrollPane3 = new javax.swing.JScrollPane();
+                productsTable = new javax.swing.JTable();
+                jButton1 = new javax.swing.JButton();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-                javax.swing.GroupLayout panelBarChartLayout = new javax.swing.GroupLayout(panelBarChart);
-                panelBarChart.setLayout(panelBarChartLayout);
-                panelBarChartLayout.setHorizontalGroup(
-                        panelBarChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 336, Short.MAX_VALUE)
-                );
-                panelBarChartLayout.setVerticalGroup(
-                        panelBarChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 256, Short.MAX_VALUE)
-                );
+                productsTable.setModel(new javax.swing.table.DefaultTableModel(
+                        new Object [][] {
+
+                        },
+                        new String [] {
+                                "Ngày", "Tên sản phẩm", "Tổng doanh thu", "Hình"
+                        }
+                ));
+                productsTable.setSize(new java.awt.Dimension(450, 164));
+                productsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+                        public void mouseClicked(java.awt.event.MouseEvent evt) {
+                                productsTableMouseClicked(evt);
+                        }
+                });
+                jScrollPane3.setViewportView(productsTable);
+
+                jButton1.setText("Đồng bộ dữ liệu");
+                jButton1.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                jButton1ActionPerformed(evt);
+                        }
+                });
 
                 javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
                 getContentPane().setLayout(layout);
                 layout.setHorizontalGroup(
                         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addGap(131, 131, 131)
-                                .addComponent(panelBarChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(568, Short.MAX_VALUE))
+                                .addContainerGap()
+                                .addComponent(jScrollPane3)
+                                .addContainerGap())
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(423, 423, 423)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(328, Short.MAX_VALUE))
                 );
                 layout.setVerticalGroup(
                         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addGap(55, 55, 55)
-                                .addComponent(panelBarChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(313, Short.MAX_VALUE))
+                                .addContainerGap()
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 581, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
                 );
 
                 pack();
         }// </editor-fold>//GEN-END:initComponents
+
+        private void productsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productsTableMouseClicked
+                int selectedRowIndex = productsTable.getSelectedRow();
+//                int productId = (int) hehe.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
+//                Product product = productService.getProductById(productId);
+//                addToTable(product);
+        }//GEN-LAST:event_productsTableMouseClicked
+
+        private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+		clearTableData();
+		displayProductsInProductsTable();
+        }//GEN-LAST:event_jButton1ActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -141,6 +199,8 @@ public class AdminDashboardPage2 extends javax.swing.JFrame {
 	}
 
         // Variables declaration - do not modify//GEN-BEGIN:variables
-        private java.awt.Panel panelBarChart;
+        private javax.swing.JButton jButton1;
+        private javax.swing.JScrollPane jScrollPane3;
+        private javax.swing.JTable productsTable;
         // End of variables declaration//GEN-END:variables
 }

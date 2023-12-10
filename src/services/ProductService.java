@@ -47,6 +47,44 @@ public class ProductService {
 		return products;
 	}
 	
+	public Product getProductByName(String name) {
+		Product product = null;
+		DBConnection dbConnection = new DBConnection();
+		Connection conn = dbConnection.getConnection();
+		String query = "SELECT * FROM products WHERE name = ?";
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+		    preparedStatement = conn.prepareStatement(query);
+		    preparedStatement.setString(1, name);
+
+		    resultSet = preparedStatement.executeQuery();
+		    if (resultSet.next()) {
+			product = new Product(
+			    resultSet.getInt("id"),
+			    resultSet.getString("name"),
+			    resultSet.getFloat("price"),
+			    resultSet.getString("add_date"),
+			    null
+			);
+		    }
+		} catch (SQLException ex) {
+		    System.out.println("Exception here: " + ex);
+		} finally {
+		    // Close resources in the reverse order of their creation to avoid resource leaks
+		    try {
+			if (resultSet != null) resultSet.close();
+			if (preparedStatement != null) preparedStatement.close();
+			if (conn != null) conn.close();
+		    } catch (SQLException e) {
+			e.printStackTrace();
+		    }
+		}
+
+		return product;
+	}
+	
 	public Product getProductById(int productId) {
 		Product product = null;
 		DBConnection dbConnection = new DBConnection();

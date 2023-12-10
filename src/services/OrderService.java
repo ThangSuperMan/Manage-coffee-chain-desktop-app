@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import models.Product;
 
@@ -24,22 +25,36 @@ import models.Product;
  * @author thangphan
  */
 public class OrderService {
-	public void insertOrder(Order order) {
+	public int insertOrder(Order order) {
 		DBConnection dbConnection = new DBConnection();
 		Connection conn = dbConnection.getConnection();
-		
+		int generatedOrderId = -1; // Default value indicating failure
+
 		try {
-			String sql = "INSERT INTO orders (total_amount, payment_method, product_id) VALUES(?, ?, ?)";
-			PreparedStatement ps = conn.prepareStatement(sql);
+		    String sql = "INSERT INTO orders (total_amount, user_id) VALUES(?, ?)";
+		    PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-			ps.setFloat(1, order.getTotalAmount());
-			ps.setString(2, order.getPaymentMethod());
-			ps.setInt(3, order.getProductId());
+		    ps.setFloat(1, order.getTotalAmount());
+		    ps.setInt(2, order.getUserId()); // Assuming you want to set the user ID
 
-			ps.executeUpdate();
-		} catch(SQLException ex) {
-			System.err.println("Exception here: " + ex);
+		    int affectedRows = ps.executeUpdate();
+
+		    if (affectedRows > 0) {
+			ResultSet generatedKeys = ps.getGeneratedKeys();
+
+			if (generatedKeys.next()) {
+			    generatedOrderId = generatedKeys.getInt(1);
+			} else {
+			    System.err.println("Failed to retrieve generated order ID.");
+			}
+		    } else {
+			System.err.println("Failed to insert order.");
+		    }
+		} catch (SQLException ex) {
+		    System.err.println("Exception here: " + ex);
 		}
+
+		return generatedOrderId;
 	}
 	
 	public Float getTotalAmountByPaymentMethod(String paymentMethod) {

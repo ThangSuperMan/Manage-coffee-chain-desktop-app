@@ -29,8 +29,13 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ManageOrderPage extends javax.swing.JFrame {
     static final int PRODUCT_ID_COLUMN_POSITION = 0;
+    static final int PRODUCT_QUANTITY_COLUMN_POSITION = 1;
+    static final int PRODUCT_NAME_COLUMN_POSITION = 0;
+    static final int POINTS_EARN = 10;
     ProductService productService = new ProductService();
+    UserService userService = new UserService();
     Utils utils = new Utils();
+    int pointsEarnedOfUser = 0;
 
     /** Creates new form Home */
     public ManageOrderPage() {
@@ -39,6 +44,53 @@ public class ManageOrderPage extends javax.swing.JFrame {
         productsTable.getColumnModel().getColumn(0).setPreferredWidth(200);
 	displayProductsInProductsTable();
     }
+    
+	
+	public Float getDiscountAmount(Float totalAmount, Float discountPercentage) {
+		return totalAmount - (totalAmount * discountPercentage);
+	}
+	
+	private boolean isUserExists(String phoneNumber) {
+		User user = userService.getUserByPhoneNumber(phoneNumber);
+		
+		return user != null ? true : false;
+	}
+	
+	private void autoFulfilNameOfUser(String phoneNumber) {
+		System.out.println("autoFullFillNameOfUser");
+		User user = userService.getUserByPhoneNumber(phoneNumber);
+		System.out.println("Name of user: " + user.getName());
+		nameOfUserTextField.setText(user.getName());
+	}
+
+	private void createUserWithoutPointsEarn(User user) {
+		userService.insertUser(user);
+	}
+
+	private void updateOrCreateUserBasedOnConditionToEarnPoints(String phoneNumber, Float totalAmount) {
+		boolean isApproveToEarnPoints = totalAmount >= 100000;
+		boolean isUserExists = isUserExists(phoneNumber);
+		String nameOfUser = nameOfUserTextField.getText();
+
+		User user = null;
+		
+		System.out.println("isUserExists: " + isUserExists);
+		System.out.println("isApproveToEarnPoints: " + isApproveToEarnPoints);
+		
+		if (isUserExists) {
+			user = new User(nameOfUser, phoneNumber);
+
+			if (isApproveToEarnPoints) {
+				user.setPointsEarned(POINTS_EARN);
+			}
+
+			userService.updateUserPoints(user);
+		} else {
+			user = new User(nameOfUser, phoneNumber, isApproveToEarnPoints ? POINTS_EARN : 0);
+			userService.insertUser(user);
+		}
+	}
+	
     
     static class ImageRenderer extends JLabel implements TableCellRenderer {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -103,15 +155,12 @@ public class ManageOrderPage extends javax.swing.JFrame {
             billTextPanel.setText(billTextPanel.getText() + "----------------------------------------------------------------\n");
             billTextPanel.setText(billTextPanel.getText() + "Tổng phụ :\t"+totalTextField.getText()+"\n");
             billTextPanel.setText(billTextPanel.getText() + "Tiền đã nhận :\t"+cashReceiveTextField.getText()+"\n");
-            billTextPanel.setText(billTextPanel.getText() + "Tiền dư :\t"+balanceTextField.getText()+"\n");
             billTextPanel.setText(billTextPanel.getText() + "====================================\n");
             billTextPanel.setText(billTextPanel.getText() +"                     Cảm ơn bạn đã ghe thăm shop chúng tôi...!"+"\n");
             billTextPanel.setText(billTextPanel.getText() + "----------------------------------------------------------------\n");
             billTextPanel.setText(billTextPanel.getText() +"                     Bản quyển thuộc quán cà phê hạnh phúcs"+"\n");
             
-            
             billTextPanel.print();
-            
         } catch (PrinterException ex) {
             
             Logger.getLogger(ManageOrderPage.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,17 +190,18 @@ public class ManageOrderPage extends javax.swing.JFrame {
             
             total += Double.valueOf(price) * Double.valueOf(quantity);
         }
-        total += Double.valueOf(taxTextField.getText());
         
         return String.valueOf(total);
     }
     
     public void setTotalAndSubTotalData(String subTotal, String total) {
+	System.out.println("setTotalAndSubTotalData");
         subTotalTextField.setText(subTotal);
         totalTextField.setText(total);
     }
     
     public void addToTable(Product product) {
+	System.out.println("addToTable");
         String quantity = JOptionPane.showInputDialog(null, "Vui lòng nhập số lượng sản phẩm");
         Float totalQuantity = Float.valueOf(quantity);
         Float totalPrice = product.getPrice() * totalQuantity;
@@ -191,14 +241,13 @@ public class ManageOrderPage extends javax.swing.JFrame {
                 subTotalTextField = new javax.swing.JTextField();
                 totalTextField = new javax.swing.JTextField();
                 jButton1 = new javax.swing.JButton();
-                jLabel4 = new javax.swing.JLabel();
-                taxTextField = new javax.swing.JTextField();
                 payButton = new javax.swing.JButton();
-                jLabel5 = new javax.swing.JLabel();
-                balanceTextField = new javax.swing.JTextField();
                 newOrderButton = new javax.swing.JButton();
-                payByCashCheckBox = new javax.swing.JCheckBox();
-                payByMomoCheckBox = new javax.swing.JCheckBox();
+                jLabel4 = new javax.swing.JLabel();
+                nameOfUserTextField = new javax.swing.JTextField();
+                jLabel5 = new javax.swing.JLabel();
+                userPhoneNumberTextField = new javax.swing.JTextField();
+                discountLabel = new javax.swing.JLabel();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -253,12 +302,12 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(16, 16, 16)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 679, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(bannerImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
+                                .addGap(23, 23, 23))
                 );
 
                 productsTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -280,9 +329,9 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 381, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 343, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 );
                 jPanel3Layout.setVerticalGroup(
@@ -312,7 +361,7 @@ public class ManageOrderPage extends javax.swing.JFrame {
                 });
 
                 jLabel2.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                jLabel2.setText("Tổng phụ:");
+                jLabel2.setText("Tên khách hàng:");
 
                 jLabel3.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
                 jLabel3.setText("Tổng tiền:");
@@ -341,38 +390,11 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         }
                 });
 
-                jLabel4.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                jLabel4.setText("Thuế(vnd):");
-
-                taxTextField.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                taxTextField.setText("0");
-                taxTextField.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                taxTextFieldActionPerformed(evt);
-                        }
-                });
-                taxTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                        public void keyReleased(java.awt.event.KeyEvent evt) {
-                                taxTextFieldKeyReleased(evt);
-                        }
-                });
-
                 payButton.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
                 payButton.setText("Thanh toán");
                 payButton.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
                                 payButtonActionPerformed(evt);
-                        }
-                });
-
-                jLabel5.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                jLabel5.setText("Tiền dư:");
-
-                balanceTextField.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
-                balanceTextField.setText("0");
-                balanceTextField.addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                balanceTextField1ActionPerformed(evt);
                         }
                 });
 
@@ -384,96 +406,100 @@ public class ManageOrderPage extends javax.swing.JFrame {
                         }
                 });
 
-                payByCashCheckBox.setText("Thanh toán bằng tiền mặt");
+                jLabel4.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
+                jLabel4.setText("Tổng phụ:");
 
-                payByMomoCheckBox.setText("Thanh toán băng momo");
+                nameOfUserTextField.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
+                nameOfUserTextField.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                nameOfUserTextFieldActionPerformed(evt);
+                        }
+                });
+
+                jLabel5.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
+                jLabel5.setText("SĐT khách:");
+
+                userPhoneNumberTextField.setFont(new java.awt.Font(".AppleSystemUIFont", 0, 24)); // NOI18N
+                userPhoneNumberTextField.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                userPhoneNumberTextFieldActionPerformed(evt);
+                        }
+                });
+                userPhoneNumberTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                        public void keyReleased(java.awt.event.KeyEvent evt) {
+                                userPhoneNumberTextFieldKeyReleased(evt);
+                        }
+                });
+
+                discountLabel.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+                discountLabel.setForeground(new java.awt.Color(255, 102, 102));
 
                 javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
                 jPanel4.setLayout(jPanel4Layout);
                 jPanel4Layout.setHorizontalGroup(
                         jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(16, 16, 16)
-                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(newOrderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(jPanel4Layout.createSequentialGroup()
+                                                .addComponent(jLabel1)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(cashReceiveTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(jPanel4Layout.createSequentialGroup()
                                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jLabel1))
-                                                .addGap(122, 122, 122))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(cashReceiveTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
-                                                .addComponent(totalTextField, javax.swing.GroupLayout.Alignment.TRAILING)
-                                                .addComponent(subTotalTextField, javax.swing.GroupLayout.Alignment.TRAILING))
-                                        .addComponent(newOrderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(subTotalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addGroup(jPanel4Layout.createSequentialGroup()
+                                                                .addComponent(totalTextField)
+                                                                .addGap(2, 2, 2)))))
                                 .addGap(26, 26, 26)
                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addGroup(jPanel4Layout.createSequentialGroup()
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jLabel4)
-                                                        .addComponent(jLabel5))
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(taxTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                                .addGap(7, 7, 7)
-                                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                                                .addGap(0, 0, Short.MAX_VALUE)
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                                        .addComponent(payButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(payByCashCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(payByMomoCheckBox)
-                                                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 194, Short.MAX_VALUE))
-                                                .addGap(84, 84, 84))))
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel4Layout.createSequentialGroup()
-                                        .addGap(16, 16, 16)
-                                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addContainerGap(565, Short.MAX_VALUE)))
+                                                .addComponent(jLabel2)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(nameOfUserTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(jPanel4Layout.createSequentialGroup()
+                                                .addComponent(jLabel5)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(userPhoneNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 243, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(discountLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(jPanel4Layout.createSequentialGroup()
+                                                        .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addContainerGap(121, Short.MAX_VALUE))
                 );
                 jPanel4Layout.setVerticalGroup(
                         jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(19, 19, 19)
-                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                .addComponent(subTotalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(jLabel4))
-                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                .addGap(4, 4, 4)
-                                                .addComponent(taxTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                .addGap(14, 14, 14)
-                                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                                                .addComponent(jLabel3)
-                                                                .addComponent(totalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(jLabel5)))
-                                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                                .addGap(12, 12, 12)
-                                                .addComponent(balanceTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(18, 18, 18)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                                .addContainerGap()
                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel1)
+                                        .addComponent(subTotalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel4)
+                                        .addComponent(jLabel5)
+                                        .addComponent(userPhoneNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel3)
+                                        .addComponent(totalTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel2)
+                                        .addComponent(nameOfUserTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(15, 15, 15)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(cashReceiveTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(payByCashCheckBox)
-                                        .addComponent(payByMomoCheckBox))
-                                .addGap(18, 18, 18)
+                                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(discountLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(newOrderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(76, Short.MAX_VALUE))
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel4Layout.createSequentialGroup()
-                                        .addGap(16, 16, 16)
-                                        .addComponent(jLabel2)
-                                        .addContainerGap(209, Short.MAX_VALUE)))
+                                .addContainerGap(102, Short.MAX_VALUE))
                 );
 
                 javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -496,7 +522,7 @@ public class ManageOrderPage extends javax.swing.JFrame {
                                         .addGroup(layout.createSequentialGroup()
                                                 .addGap(18, 18, 18)
                                                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addGroup(layout.createSequentialGroup()
                                                 .addContainerGap()
@@ -514,14 +540,8 @@ public class ManageOrderPage extends javax.swing.JFrame {
         billTextPanel.setText("");
         subTotalTextField.setText("");
         totalTextField.setText("");
-        taxTextField.setText("");
-        balanceTextField.setText("");
         cashReceiveTextField.setText("");
     }//GEN-LAST:event_createNewOrderActionPerformed
-
-        private void balanceTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_balanceTextField1ActionPerformed
-                // TODO add your handling code here:
-        }//GEN-LAST:event_balanceTextField1ActionPerformed
 
         private void payButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payButtonActionPerformed
                 Double cashReceive = Double.valueOf(cashReceiveTextField.getText());
@@ -532,45 +552,69 @@ public class ManageOrderPage extends javax.swing.JFrame {
 
                         if (cashRequired > total) {
                                 Double balance = Double.valueOf(cashRequired) - Double.valueOf(total);
-                                balanceTextField.setText(String.valueOf(balance));
                         }
 
-                        balanceTextField.setText(getTotal());
                         return;
                 }
 
                 Float total = Float.valueOf(getTotal());
+		if (pointsEarnedOfUser != 0) {
+			Float discountPercentage = Float.valueOf(pointsEarnedOfUser) / 100;
+			total = getDiscountAmount(total, discountPercentage);
+			System.out.println("total after discount: " + total);
+			
+			// need to delete the earns point after using it
+			String phoneNumber = userPhoneNumberTextField.getText();
+			User user = userService.getUserByPhoneNumber(phoneNumber);
+			user.setPointsEarned(0);
+			userService.updateUserPoints(user);
+		}
                 Float cashRequired = Float.valueOf(cashReceiveTextField.getText());
                 Float balance = cashRequired - total;
-                balanceTextField.setText(String.valueOf(balance));
+		User user = null;
+		
+		System.out.println("total from text field" + total);
+		String phoneNumber = userPhoneNumberTextField.getText();
+		String nameOfUser = nameOfUserTextField.getText();
+
+		updateOrCreateUserBasedOnConditionToEarnPoints(phoneNumber, total);
                 printBill();
 		
-		// Save the order to the database
-		
-		// get payment method
-		
-		String paymentMethod = "cash";
-		if (payByMomoCheckBox.isSelected()) {
-			paymentMethod = "momo";
-		}
 		OrderService orderService = new OrderService();
-		int selectedRowIndex = productsOrderMenuTable.getSelectedRow();
-		int productId = (int) productsOrderMenuTable.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
+//		int selectedRowIndex = productsOrderMenuTable.getSelectedRow();
+//		int productId = (int) productsOrderMenuTable.getValueAt(selectedRowIndex, PRODUCT_ID_COLUMN_POSITION);
 //		Product product = productService.getProductById(productId);
 //		addToTable(product);
-		Order order = new Order(total, paymentMethod, productId);
-		orderService.insertOrder(order);
+
+		user = userService.getUserByPhoneNumber(phoneNumber);
+		Order order = new Order(total, user.getId());
+		int orderId = orderService.insertOrder(order);
+		OrderProductService orderProductService = new OrderProductService();
+	
+		
+		int itemsCount = productsTable.getRowCount();
+		
+		System.out.println("items count: " + itemsCount);
+		
+		for (int i = 0; i < itemsCount; i++) {
+			System.out.println("Loop me!");
+			String productName = String.valueOf(productsTable.getValueAt(i, PRODUCT_NAME_COLUMN_POSITION));
+			String quatityValue = String.valueOf(productsTable.getValueAt(i, PRODUCT_QUANTITY_COLUMN_POSITION));
+			String[] quantityArrayOfStrings = quatityValue.split("\\.");
+			System.out.println("quantityArrayOfStrings: " + quantityArrayOfStrings[0]);
+			int quantity = Integer.valueOf(quantityArrayOfStrings[0]);
+			
+			Product product = productService.getProductByName(productName);
+			
+			System.out.println("orderId: " + orderId);
+			System.out.println("productId: " + product.getId());
+			System.out.println("quantity: " + quantity);
+			OrderProduct orderProduct = new OrderProduct(orderId, product.getId(), quantity);
+			orderProductService.insertOrderProduct(orderProduct);
+		}
+		
 		JOptionPane.showMessageDialog(null, "Đơn hàng đã thanh toán thành công");
         }//GEN-LAST:event_payButtonActionPerformed
-
-        private void taxTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_taxTextFieldKeyReleased
-                setTotalAndSubTotalData(getSubTotal(), getTotal());
-        }//GEN-LAST:event_taxTextFieldKeyReleased
-
-        private void taxTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taxTextFieldActionPerformed
-                //        String subTotal = getSubTotal();
-                //        subTotalTextField.setText(subTotal);
-        }//GEN-LAST:event_taxTextFieldActionPerformed
 
         private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
                 // TODO add your handling code here:
@@ -598,6 +642,33 @@ public class ManageOrderPage extends javax.swing.JFrame {
 		Product product = productService.getProductById(productId);
 		addToTable(product);
         }//GEN-LAST:event_productsOrderMenuTableMouseClicked
+
+        private void nameOfUserTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameOfUserTextFieldActionPerformed
+                // TODO add your handling code here:
+        }//GEN-LAST:event_nameOfUserTextFieldActionPerformed
+
+        private void userPhoneNumberTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userPhoneNumberTextFieldActionPerformed
+                // TODO add your handling code here:
+        }//GEN-LAST:event_userPhoneNumberTextFieldActionPerformed
+
+	
+        private void userPhoneNumberTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_userPhoneNumberTextFieldKeyReleased
+		String phoneNumber = userPhoneNumberTextField.getText();
+		if (isUserExists(phoneNumber)) {
+			autoFulfilNameOfUser(phoneNumber);
+			User user = userService.getUserByPhoneNumber(phoneNumber);
+			System.out.println("points earned: " + user.getPointsEarned());
+			if (user.getPointsEarned() >= 10) {
+				pointsEarnedOfUser = user.getPointsEarned();
+				Float total = Float.valueOf(totalTextField.getText());
+				Float discountPercentage = Float.valueOf(pointsEarnedOfUser) / 100;
+				Float totalAmountAfterDiscount = getDiscountAmount(total, discountPercentage);
+				totalTextField.setText(String.valueOf(totalAmountAfterDiscount));
+				
+				discountLabel.setText("Khách hàng này được giảm giá 10%.");
+			}
+		}
+        }//GEN-LAST:event_userPhoneNumberTextFieldKeyReleased
 
     /**
      * @param args the command line arguments
@@ -636,10 +707,10 @@ public class ManageOrderPage extends javax.swing.JFrame {
     }
 
         // Variables declaration - do not modify//GEN-BEGIN:variables
-        private javax.swing.JTextField balanceTextField;
         private javax.swing.JLabel bannerImageLabel;
         private javax.swing.JTextPane billTextPanel;
         private javax.swing.JTextField cashReceiveTextField;
+        private javax.swing.JLabel discountLabel;
         private javax.swing.JButton jButton1;
         private javax.swing.JLabel jLabel1;
         private javax.swing.JLabel jLabel2;
@@ -653,15 +724,14 @@ public class ManageOrderPage extends javax.swing.JFrame {
         private javax.swing.JScrollPane jScrollPane1;
         private javax.swing.JScrollPane jScrollPane2;
         private javax.swing.JScrollPane jScrollPane3;
+        private javax.swing.JTextField nameOfUserTextField;
         private javax.swing.JButton newOrderButton;
         private javax.swing.JButton payButton;
-        private javax.swing.JCheckBox payByCashCheckBox;
-        private javax.swing.JCheckBox payByMomoCheckBox;
         private javax.swing.JTable productsOrderMenuTable;
         private javax.swing.JTable productsTable;
         private javax.swing.JTextField subTotalTextField;
-        private javax.swing.JTextField taxTextField;
         private javax.swing.JTextField totalTextField;
+        private javax.swing.JTextField userPhoneNumberTextField;
         // End of variables declaration//GEN-END:variables
 
 }

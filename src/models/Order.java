@@ -15,23 +15,19 @@ public class Order {
     private int id;
     private String orderDate;
     private Float totalAmount;
-    private String paymentMethod;
-    private int productId;
+    private int userId;
 
-    public Order(int id, String orderDate, Float totalAmount, String paymentMethod, int productId) {
+    public Order(int id, String orderDate, Float totalAmount, int userId) {
         this.id = id;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
-        this.paymentMethod = paymentMethod;
-        this.productId = productId;
+	this.userId = userId;
     }
     
     // Constructor without id and orderDate
-    public Order(Float totalAmount, String paymentMethod, int productId) {
-        this.id = id;
+    public Order(Float totalAmount, int userId) {
         this.totalAmount = totalAmount;
-        this.paymentMethod = paymentMethod;
-        this.productId = productId;
+	this.userId = userId;
     }
 
     public int getId() {
@@ -57,20 +53,12 @@ public class Order {
     public void setTotalAmount(Float totalAmount) {
         this.totalAmount = totalAmount;
     }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
+    
+    public int getUserId() {
+	return userId;
     }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public int getProductId() {
-        return productId;
-    }
-
-    public void setProductId(int productId) {
-        this.productId = productId;
+    
+    public void setUserId(int userId) {
+	this.userId = userId;
     }
 }
