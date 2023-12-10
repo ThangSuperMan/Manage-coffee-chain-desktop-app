@@ -45,6 +45,28 @@ public class UserService {
 		}
 	}
 	
+//	public void insertUserWithEnoughEssentialInformations(User user) {
+//		DBConnection dbConnection = new DBConnection();
+//		Connection conn = dbConnection.getConnection();
+//		
+//		boolean isAddPointsEarn = user.getPointsEarned() != 0;
+//		String sql = isAddPointsEarn ? "INSERT INTO users (name, phone_number, points_earned) VALUES(?, ?, ?)" : 
+//						   "INSERT INTO users (name, phone_number) VALUES(?, ?)";
+//		
+//		try {
+//			PreparedStatement ps = conn.prepareStatement(sql);
+//			ps.setString(1, user.getName());
+//			ps.setString(2, user.getPhoneNumber());
+//			
+//			if (isAddPointsEarn) {
+//				ps.setInt(3, user.getPointsEarned());
+//			}
+//			ps.executeUpdate();
+//		} catch(SQLException ex) {
+//			System.err.println("Exception here: " + ex);
+//		}
+//	}
+	
 	public User getUserByPhoneNumber(String phoneNumber) {
 		User user = null;
 		DBConnection dbConnection = new DBConnection();
@@ -80,6 +102,45 @@ public class UserService {
 
 		return user;
 	}
+	
+	public User getUserByEmail(String email) {
+		User user = null;
+		DBConnection dbConnection = new DBConnection();
+		Connection conn = dbConnection.getConnection();
+		String query = "SELECT * FROM users WHERE email = ?";
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+
+		try {
+		    preparedStatement = conn.prepareStatement(query);
+		    preparedStatement.setString(1, email);
+
+		    resultSet = preparedStatement.executeQuery();
+		    if (resultSet.next()) {
+			user = new User(
+			    resultSet.getInt("id"),
+			    resultSet.getString("email"),
+			    resultSet.getString("password"),
+			    resultSet.getString("name"),
+		            resultSet.getString("phone_number"),
+			    resultSet.getInt("points_earned")
+			);
+		    }
+		} catch (SQLException ex) {
+		    System.out.println("Exception here: " + ex);
+		} finally {
+		    try {
+			if (resultSet != null) resultSet.close();
+			if (preparedStatement != null) preparedStatement.close();
+			if (conn != null) conn.close();
+		    } catch (SQLException e) {
+			e.printStackTrace();
+		    }
+		}
+
+		return user;
+	}
+	
 	
 	public void updateUserPoints(User user) {
 		DBConnection dbConnection = new DBConnection();
